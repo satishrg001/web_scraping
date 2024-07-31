@@ -12,14 +12,24 @@ Dependencies of python packages: Requirements.txt
 
 
 Pre-requisite for running this Python script:
-1. Install Python 3.8.2
-1. Install Python packages/Modules as per the provided requirements.txt
-1. Install Microsoft Excel application
-2. Configure the path as per your requirement, in Define Variables section, in scrape_hockey_stats_webpage.py script.
+
+1. Clone this Repository
+2. Install Python 3.8.2
+3. Install Python packages/Modules as per the provided requirements.txt (pip3 install -r requirements.txt)
+4. Go to this directory e.g. cd <cloned directory>
+5. Configure the parameters as per the requirement in Parameters.py
+6. Microsoft Excel application should be available
+7. Internet connection is required
+8. User should have access to the URL mentioned in Parameters.py
+9. Run the application
    
 How to run the python script:
+
 python scrape_hockey_stats_webpage.py
 
+
 Note: 
+
 After running the script, you will be returned to the prompt once the script execution is completed. 
 You may check the scraping_*.log file for the progress and more information. 
+
