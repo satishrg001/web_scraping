@@ -7,6 +7,7 @@
 
 
 # Import required Python modules
+import Parameters
 import warnings
 import httplib2
 from bs4 import BeautifulSoup, SoupStrainer
@@ -16,52 +17,68 @@ import logging
 import requests
 from socket import timeout
 from urllib.error import HTTPError, URLError
-import datetime
+from datetime import datetime
 import shutil
 import pandas as pd
 
+
+start_time = datetime.now()
+print("Scraping Process Started at", start_time)
+
 # Setting the warnings to be ignored
-warnings.filterwarnings('ignore')
+warning_switch_p = Parameters.warning_switch
+warnings.filterwarnings(warning_switch_p)
 
 # Configure logging
-current_date_time = datetime.datetime.now().strftime('%H_%M_%S_%d_%m_%Y')
-logfile_path = "D:/exercise/"
-logging.basicConfig(filename=logfile_path + "scraping_" + current_date_time + ".log", filemode="a",
+current_date_time = datetime.now().strftime('%H_%M_%S_%d_%m_%Y')
+logfile_path_p = Parameters.logfile_path
+logging.basicConfig(filename=logfile_path_p + "scraping_" + current_date_time + ".log", filemode="a",
                     format="%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s", datefmt="%H:%M:%S",
                     level=logging.DEBUG)
 
 logging.info("Scraping Process Started....")
 
 # Define variables
-final_url = ""
-prj_folder = "D:/exercise/"
-prj_name = "hockey_stats_webpages/"
-html_site_folder = "www.scrapethissite.com/pages/forms/"
-p_num_prefix = "page_num_"
-file_extension = ".html"
+prj_folder_p = Parameters.prj_folder
+prj_name_p = Parameters.prj_name
+html_site_folder_p = Parameters.html_site_folder
+p_num_prefix_p = Parameters.p_num_prefix
+url_p = Parameters.url
+root_dir_p = Parameters.root_dir
+archive_path_p = Parameters.archive_path + current_date_time
+excel_file_name_p = Parameters.excel_file_name + current_date_time + Parameters.excel_file_extension
+excel_file_name_wl_p = Parameters.excel_file_name_wl + current_date_time + Parameters.excel_file_extension
+sheet_name1_p = Parameters.sheet_name1
+sheet_name2_p = Parameters.sheet_name2
+file_extension_p = Parameters.file_extension
+year_1_p = Parameters.year_1
+year_2_p = Parameters.year_2
+column_name_cmp_p = Parameters.column_name_cmp
+group_by_column_1_p = Parameters.group_by_column_1
+group_by_column_2_p = Parameters.group_by_column_2
+sum_column_1_p = Parameters.sum_column_1
+sum_column_2_p = Parameters.sum_column_2
 html_path = ""
 p_num = ""
-url = 'https://www.scrapethissite.com/pages/forms/'
+final_url = ""
 df = pd.DataFrame()
-root_dir = "D:\exercise\hockey_stats_webpages"
-archive_path = "D:\exercise\html_webpages_" + current_date_time
-excel_file_name = "D:\exercise\hockey_processed_data_" + current_date_time + ".xlsx"
-excel_file_name_wl = "D:\exercise\winners_losers_" + current_date_time + ".xlsx"
-sheet_name1 = "NHL Stats 1990-2011"
-sheet_name2 = "Winner and Loser per Year"
 
 # Check url is accessible and get response
 try:
-    status, response = httplib2.Http().request(url)
+    status, response = httplib2.Http().request(url_p)
+
 except HTTPError as error:
-    logging.error('HTTP Error: %s\nURL: %s', error, url)
+    logging.error('HTTP Error: %s\nurl: %s', error, url_p)
 except URLError as error:
     if isinstance(error.reason, timeout):
-        logging.error('Timeout Error: %s\nURL: %s', error, url)
+        logging.error('Timeout Error: %s\nurl: %s', error, url_p)
     else:
-        logging.error('URL Error:  %s\nURL: %s', error, url)
+        logging.error('url Error:  %s\nurl: %s', error, url_p)
+except Exception as error:
+    logging.error('Unexpected Error:  %s\nurl: %s', error, url_p)
 else:
-    logging.info('Url Access successful.')
+    logging.info('url Access successful.')
+
 
 # Save all the webpages including sub-pages for the url
 try:
@@ -81,23 +98,23 @@ try:
                 p_num = text[p_num_position + 1:]
 
                 # Prepare final url with page number
-                final_url = url + page_num_suffix
+                final_url = url_p + page_num_suffix
 
                 # Save Webpage to html file
                 save_webpage(
                     url=final_url,
-                    project_folder=prj_folder,
-                    project_name=prj_name,
+                    project_folder=prj_folder_p,
+                    project_name=prj_name_p,
                     bypass_robots=True,
                     debug=False,
                     open_in_browser=False,
                     delay=None,
-                    threaded=True
+                    threaded=True,
                 )
                 logging.info(final_url)
 
                 # Load the downloaded HTML file to extract data table from html webpage
-                html_path = prj_folder + prj_name + html_site_folder + p_num_prefix + p_num + file_extension
+                html_path = prj_folder_p + prj_name_p + html_site_folder_p + p_num_prefix_p + p_num + file_extension_p
                 with open(html_path, 'r', encoding='utf-8') as file:
                     soup = BeautifulSoup(file, 'html.parser')
 
@@ -108,7 +125,7 @@ try:
                 df = pd.concat([df, pd.read_html(str(table))[0]], ignore_index=True)
 
 except requests.exceptions.ConnectionError as e:
-    logging.info("Connection timeout. URL->%s, Error->%s", final_url, e)
+    logging.info("Connection timeout. url->%s, Error->%s", final_url, e)
     pass
 except Exception as err:
     logging.error(err)
@@ -117,23 +134,27 @@ except Exception as err:
 df = df.sort_values('Year')
 
 # Filter the data
-df = df[(df['Year'] >= 1990) & (df['Year'] <= 2011)]
+df = df[(df[column_name_cmp_p] >= year_1_p) & (df[column_name_cmp_p] <= year_2_p)]
 
 # Save filtered data into Excel file for NHL Stats 1990-2011
-df.to_excel(excel_file_name, index=False, sheet_name=sheet_name1)
+df.to_excel(excel_file_name_p, index=False, sheet_name=sheet_name1_p)
 
-df2 = df.groupby(['Year', 'Team Name'])['Wins'].sum()
-df3 = df.groupby(['Year', 'Team Name'])['Losses'].sum()
+df2 = df.groupby([group_by_column_1_p, group_by_column_2_p])[sum_column_1_p].sum()
+df3 = df.groupby([group_by_column_1_p, group_by_column_1_p])[sum_column_2_p].sum()
 
 df_concat = pd.concat([df2, df3], axis=1)
 
 # Save wins_losses data into excel file
-df_concat.to_excel(excel_file_name_wl, sheet_name=sheet_name2)
+df_concat.to_excel(excel_file_name_wl_p, sheet_name=sheet_name2_p)
 
 logging.info("Zipping html webpages into a zip file")
 
 # Zip downloaded html webpages
-shutil.make_archive(archive_path, format='zip', root_dir=root_dir)
+shutil.make_archive(archive_path_p, format='zip', root_dir=root_dir_p)
 logging.info("Zipped...")
 
 logging.info("Scraping Process Completed.")
+
+end_time = datetime.now()
+print("Scraping Process Completed at", end_time)
+print('Duration: {}'.format(end_time - start_time))
