@@ -1,13 +1,13 @@
 # Author : Satish Gaikwad
-# Purpose: This program is used to scrape the data from a webpage and to save the scraped data into excel sheet.
-#          Its also saves the webpages and it's sub-pages into .html files and zip it.
+# Purpose: This program is used to scrape the data from a webpage and to save the scraped data into Excel sheet.
+#          It also saves the webpages and it's sub-pages into .html files and zip it.
 # Version: 1.0
 # Date: 31-JUL-2024
 # Requirement: https://github.com/satishrg001/web_scraping/etl_task.docx
 
 
-# Import required python modules
-
+# Import required Python modules
+import warnings
 import httplib2
 from bs4 import BeautifulSoup, SoupStrainer
 import re
@@ -19,6 +19,9 @@ from urllib.error import HTTPError, URLError
 import datetime
 import shutil
 import pandas as pd
+
+# Setting the warnings to be ignored
+warnings.filterwarnings('ignore')
 
 # Configure logging
 current_date_time = datetime.datetime.now().strftime('%H_%M_%S_%d_%m_%Y')
@@ -42,7 +45,10 @@ url = 'https://www.scrapethissite.com/pages/forms/'
 df = pd.DataFrame()
 root_dir = "D:\exercise\hockey_stats_webpages"
 archive_path = "D:\exercise\html_webpages_" + current_date_time
-excel_file_name = "D:\exercise\hockey_processed_data" + current_date_time + ".xlsx"
+excel_file_name = "D:\exercise\hockey_processed_data_" + current_date_time + ".xlsx"
+excel_file_name_wl = "D:\exercise\winners_losers_" + current_date_time + ".xlsx"
+sheet_name1 = "NHL Stats 1990-2011"
+sheet_name2 = "Winner and Loser per Year"
 
 # Check url is accessible and get response
 try:
@@ -114,7 +120,7 @@ df = df.sort_values('Year')
 df = df[(df['Year'] >= 1990) & (df['Year'] <= 2011)]
 
 # Save filtered data into Excel file for NHL Stats 1990-2011
-df.to_excel(excel_file_name, index=False, sheet_name="NHL Stats 1990-2011")
+df.to_excel(excel_file_name, index=False, sheet_name=sheet_name1)
 
 df2 = df.groupby(['Year', 'Team Name'])['Wins'].sum()
 df3 = df.groupby(['Year', 'Team Name'])['Losses'].sum()
@@ -122,7 +128,7 @@ df3 = df.groupby(['Year', 'Team Name'])['Losses'].sum()
 df_concat = pd.concat([df2, df3], axis=1)
 
 # Save wins_losses data into excel file
-df_concat.to_excel("D:/exercise/wins_losses.xlsx", sheet_name="Winner and Loser per Year")
+df_concat.to_excel(excel_file_name_wl, sheet_name=sheet_name2)
 
 logging.info("Zipping html webpages into a zip file")
 
