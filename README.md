@@ -15,8 +15,8 @@ Pre-requisite for running this Python script:
 
 1. Clone this Repository
 2. Install Python 3.8.2
-3. Install Python packages/Modules as per the provided requirements.txt (pip3 install -r requirements.txt)
-4. Go to this directory e.g. cd <cloned directory>
+3. Go to this directory e.g. cd cloned_directory_name
+4. Install Python packages/Modules as per the provided requirements.txt (pip3 install -r requirements.txt)
 5. Configure the parameters as per the requirement in Parameters.py
 6. Microsoft Excel application should be available
 7. Internet connection is required
